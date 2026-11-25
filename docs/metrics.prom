@@ -1,0 +1,61 @@
+# Synthetic exposition example; values are illustrative.
+# HELP process_start_time_seconds Start time of the process since the Unix epoch; a change is a restart.
+# TYPE process_start_time_seconds gauge
+process_start_time_seconds 1795570000
+# HELP gametrack_http_requests_total HTTP requests answered, by route and status code.
+# TYPE gametrack_http_requests_total counter
+gametrack_http_requests_total{route="/graphql",code="200"} 12
+gametrack_http_requests_total{route="/mcp",code="200"} 7
+gametrack_http_requests_total{route="/metrics",code="200"} 30
+gametrack_http_requests_total{route="other",code="404"} 1
+# HELP gametrack_main_actor_heartbeat_age_seconds Seconds since the main actor last ran a watchdog heartbeat; the process exits past 120.
+# TYPE gametrack_main_actor_heartbeat_age_seconds gauge
+gametrack_main_actor_heartbeat_age_seconds 3.2
+# HELP gametrack_database_up 1 when the last background read of GameTrack's database succeeded and its gauges follow; 0 also while Full Disk Access is missing.
+# TYPE gametrack_database_up gauge
+gametrack_database_up 1
+# HELP gametrack_observation_timestamp_seconds When the game gauges were read, since the Unix epoch.
+# TYPE gametrack_observation_timestamp_seconds gauge
+gametrack_observation_timestamp_seconds 1795573600
+# HELP gametrack_database_modified_timestamp_seconds When GameTrack last wrote its database on this Mac, since the Unix epoch; it stops advancing when GameTrack stops syncing.
+# TYPE gametrack_database_modified_timestamp_seconds gauge
+gametrack_database_modified_timestamp_seconds 1795573000
+# HELP gametrack_game_count Games by release year, owned platform, and status, wishlist included. Every status is emitted for each year and platform that has a game.
+# TYPE gametrack_game_count gauge
+gametrack_game_count{year="2023",platform="PC",status="In Progress"} 1
+gametrack_game_count{year="2023",platform="PC",status="Queued"} 2
+gametrack_game_count{year="2023",platform="PC",status="Collection"} 0
+gametrack_game_count{year="2023",platform="PC",status="Completed"} 5
+gametrack_game_count{year="2023",platform="PC",status="Abandoned"} 1
+gametrack_game_count{year="2023",platform="PC",status="Wanted"} 0
+gametrack_game_count{year="3000",platform="",status="In Progress"} 0
+gametrack_game_count{year="3000",platform="",status="Queued"} 0
+gametrack_game_count{year="3000",platform="",status="Collection"} 0
+gametrack_game_count{year="3000",platform="",status="Completed"} 0
+gametrack_game_count{year="3000",platform="",status="Abandoned"} 0
+gametrack_game_count{year="3000",platform="",status="Wanted"} 3
+# HELP gametrack_game_rating Games by release year and the user's rating from 1 through 10; unrated games are not counted.
+# TYPE gametrack_game_rating gauge
+gametrack_game_rating{year="2023",rating="1"} 0
+gametrack_game_rating{year="2023",rating="2"} 0
+gametrack_game_rating{year="2023",rating="3"} 0
+gametrack_game_rating{year="2023",rating="4"} 0
+gametrack_game_rating{year="2023",rating="5"} 0
+gametrack_game_rating{year="2023",rating="6"} 1
+gametrack_game_rating{year="2023",rating="7"} 0
+gametrack_game_rating{year="2023",rating="8"} 3
+gametrack_game_rating{year="2023",rating="9"} 1
+gametrack_game_rating{year="2023",rating="10"} 0
+gametrack_game_rating{year="3000",rating="1"} 0
+gametrack_game_rating{year="3000",rating="2"} 0
+gametrack_game_rating{year="3000",rating="3"} 0
+gametrack_game_rating{year="3000",rating="4"} 0
+gametrack_game_rating{year="3000",rating="5"} 0
+gametrack_game_rating{year="3000",rating="6"} 0
+gametrack_game_rating{year="3000",rating="7"} 0
+gametrack_game_rating{year="3000",rating="8"} 0
+gametrack_game_rating{year="3000",rating="9"} 0
+gametrack_game_rating{year="3000",rating="10"} 0
+# HELP gametrack_games_unknown_state Games whose stored state this server does not know, which gametrack_game_count leaves out.
+# TYPE gametrack_games_unknown_state gauge
+gametrack_games_unknown_state 0

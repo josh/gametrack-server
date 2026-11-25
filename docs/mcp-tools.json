@@ -1,0 +1,1332 @@
+{
+  "tools": [
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Read games in GameTrack, wishlist included, by title unless orderBy says otherwise. Use states [\"WANTED\"] for the wishlist. Filters intersect; empty arrays match nothing. Cursor is the next page offset; keep the criteria and limit unchanged across pages.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "cursor": {
+            "description": "nextCursor from the previous page; omit for the first page.",
+            "type": "string"
+          },
+          "filter": {
+            "additionalProperties": false,
+            "description": "Criteria to match; they intersect.",
+            "properties": {
+              "addedBefore": {
+                "description": "Added to GameTrack before this timestamp or day.",
+                "type": "string"
+              },
+              "addedFrom": {
+                "description": "Added to GameTrack at or after this timestamp or day.",
+                "type": "string"
+              },
+              "excludeTags": {
+                "description": "Leave out games with any of these tag titles, ignoring case; [] leaves out nothing.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "finishedBefore": {
+                "description": "Finished before this timestamp or day.",
+                "type": "string"
+              },
+              "finishedFrom": {
+                "description": "Finished at or after this timestamp or day.",
+                "type": "string"
+              },
+              "genres": {
+                "description": "Match games with any of these genres, by name with or without its emoji, ignoring case; [] matches nothing.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "platforms": {
+                "description": "Match games owned on any of these platforms, ignoring case; [] matches nothing.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "query": {
+                "description": "Case-insensitive substring of the title, developer, or publisher.",
+                "type": "string"
+              },
+              "rated": {
+                "description": "true for games the user has rated, false for unrated ones.",
+                "type": "boolean"
+              },
+              "releasedBefore": {
+                "description": "Released before this timestamp or day.",
+                "type": "string"
+              },
+              "releasedFrom": {
+                "description": "Released at or after this RFC 3339 timestamp, or YYYY-MM-DD for that day's start in the host time zone.",
+                "type": "string"
+              },
+              "states": {
+                "description": "Match any of these states; [] matches nothing.",
+                "items": {
+                  "enum": [
+                    "IN_PROGRESS",
+                    "QUEUED",
+                    "COLLECTION",
+                    "COMPLETED",
+                    "ABANDONED",
+                    "WANTED"
+                  ],
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              "tags": {
+                "description": "Match games with any of these tag titles, ignoring case; [] matches nothing.",
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              }
+            },
+            "required": [],
+            "type": "object"
+          },
+          "limit": {
+            "default": 50,
+            "description": "Maximum items in the page, from 1 through 100; defaults to 50.",
+            "maximum": 100,
+            "minimum": 1,
+            "type": "integer"
+          },
+          "orderBy": {
+            "additionalProperties": false,
+            "properties": {
+              "direction": {
+                "description": "ASC for smallest or earliest first, DESC for the reverse; defaults to ASC.",
+                "enum": ["ASC", "DESC"],
+                "type": "string"
+              },
+              "field": {
+                "description": "What to sort by. Games without the value sort last.",
+                "enum": [
+                  "TITLE",
+                  "IGDB_ID",
+                  "RELEASE_DATE",
+                  "ADDED_DATE",
+                  "START_DATE",
+                  "FINISH_DATE",
+                  "UPDATED_AT",
+                  "USER_RATING",
+                  "CRITIC_RATING",
+                  "HOURS_PLAYED"
+                ],
+                "type": "string"
+              }
+            },
+            "required": ["field"],
+            "type": "object"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "name": "games_search",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "items": {
+            "description": "Games in this page.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "addedDate": {
+                  "description": "When the game was added to GameTrack.",
+                  "type": "string"
+                },
+                "additionalPlatforms": {
+                  "description": "Other platforms the user also has the game on.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "additionalPlaytime": {
+                  "description": "Additional play time in hours, as stored.",
+                  "type": "number"
+                },
+                "bannerUrl": {
+                  "description": "URL of the banner image.",
+                  "type": "string"
+                },
+                "completion": {
+                  "description": "Progress through the game, as a percentage from 0 through 100.",
+                  "type": "integer"
+                },
+                "completionMode": {
+                  "description": "The completion mode as stored.",
+                  "type": "integer"
+                },
+                "completionState": {
+                  "description": "How far a completed game was taken, as stored: 0 when not completed, otherwise 1 through 3.",
+                  "type": "integer"
+                },
+                "criticRating": {
+                  "description": "The critics' score out of 100; 0 or -1 when there is none.",
+                  "type": "integer"
+                },
+                "developer": {
+                  "description": "The developer.",
+                  "type": "string"
+                },
+                "finishDate": {
+                  "description": "When the user finished or abandoned the game.",
+                  "type": "string"
+                },
+                "format": {
+                  "description": "The format owned, as stored; 0 for most games.",
+                  "type": "integer"
+                },
+                "gameState": {
+                  "description": "The state as stored: 1 in progress, 2 queued, 3 collection, 4 completed, 5 abandoned, 6 wanted.",
+                  "type": "integer"
+                },
+                "genres": {
+                  "description": "The game's genres, ordered by genre ID.",
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "id": {
+                        "description": "The genre's ID at IGDB.",
+                        "type": "integer"
+                      },
+                      "name": {
+                        "description": "The name, with the emoji GameTrack shows before it.",
+                        "type": "string"
+                      }
+                    },
+                    "required": ["id", "name"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "hoursPlayed": {
+                  "description": "Hours played.",
+                  "type": "number"
+                },
+                "id": {
+                  "description": "The game's UUID in GameTrack, in uppercase; it does not change over time.",
+                  "type": "string"
+                },
+                "igdbId": {
+                  "description": "The game's ID at IGDB, where GameTrack takes its metadata from.",
+                  "type": "integer"
+                },
+                "notes": {
+                  "description": "The user's notes.",
+                  "type": "string"
+                },
+                "ownedPlatform": {
+                  "description": "The platform the user has the game on.",
+                  "type": "string"
+                },
+                "platforms": {
+                  "description": "Every platform the game is released on.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "playStationId": {
+                  "description": "ID of the linked PlayStation game.",
+                  "type": "string"
+                },
+                "playthroughs": {
+                  "description": "The game's playthroughs, oldest first.",
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "completionState": {
+                        "description": "How far the playthrough was taken, as a game's completionState.",
+                        "type": "integer"
+                      },
+                      "dateFinished": {
+                        "description": "When the playthrough ended.",
+                        "type": "string"
+                      },
+                      "dateStarted": {
+                        "description": "When the playthrough started.",
+                        "type": "string"
+                      },
+                      "duration": {
+                        "description": "Days from start to finish.",
+                        "type": "integer"
+                      },
+                      "gameId": {
+                        "description": "UUID of the playthrough's game.",
+                        "type": "string"
+                      },
+                      "id": {
+                        "description": "The playthrough's UUID in GameTrack.",
+                        "type": "string"
+                      },
+                      "lastPlayedAt": {
+                        "description": "When the game was last played in this playthrough.",
+                        "type": "string"
+                      },
+                      "name": {
+                        "description": "The name the user gave the playthrough.",
+                        "type": "string"
+                      },
+                      "platform": {
+                        "description": "The platform played on.",
+                        "type": "string"
+                      },
+                      "playHours": {
+                        "description": "Hours played in this playthrough.",
+                        "type": "number"
+                      },
+                      "progress": {
+                        "description": "Progress as a percentage from 0 through 100; -1 when not set.",
+                        "type": "integer"
+                      },
+                      "rating": {
+                        "description": "The user's rating of this playthrough; 0 when unrated.",
+                        "type": "number"
+                      },
+                      "state": {
+                        "description": "The playthrough's state as stored, with the meanings of a game's gameState; 0 for a game on the wishlist.",
+                        "type": "integer"
+                      },
+                      "tags": {
+                        "description": "Tags on the playthrough, as stored.",
+                        "type": "string"
+                      }
+                    },
+                    "required": ["id", "gameId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "posterUrl": {
+                  "description": "URL of the cover image.",
+                  "type": "string"
+                },
+                "priority": {
+                  "description": "The priority as stored; -1 on every game seen so far.",
+                  "type": "integer"
+                },
+                "publisher": {
+                  "description": "The publisher.",
+                  "type": "string"
+                },
+                "releaseDate": {
+                  "description": "When the game is released. 4001-01-01 means the date is to be announced, and a date at the last second of a year in Pacific time means only the year is known.",
+                  "type": "string"
+                },
+                "releaseYear": {
+                  "description": "The release year as stored: 0 for most games, which have only a release date, and 3000 when the date is to be announced.",
+                  "type": "integer"
+                },
+                "review": {
+                  "description": "The user's review.",
+                  "type": "string"
+                },
+                "reviewSpoilers": {
+                  "description": "Whether the review is marked as containing spoilers.",
+                  "type": "boolean"
+                },
+                "siteUrl": {
+                  "description": "URL of the game's web page.",
+                  "type": "string"
+                },
+                "startDate": {
+                  "description": "When the user started the game.",
+                  "type": "string"
+                },
+                "state": {
+                  "description": "Where the game stands: IN_PROGRESS, QUEUED, COLLECTION, COMPLETED, ABANDONED, or WANTED for the wishlist. Derived from gameState; absent for a value the server does not know.",
+                  "enum": [
+                    "IN_PROGRESS",
+                    "QUEUED",
+                    "COLLECTION",
+                    "COMPLETED",
+                    "ABANDONED",
+                    "WANTED"
+                  ],
+                  "type": "string"
+                },
+                "status": {
+                  "description": "An older status label, kept as stored; GameTrack no longer updates it and it often disagrees with state.",
+                  "type": "string"
+                },
+                "steamDeckStatus": {
+                  "description": "Steam Deck compatibility as stored: -1 when not checked, otherwise 0 through 3.",
+                  "type": "integer"
+                },
+                "steamId": {
+                  "description": "ID of the linked Steam game.",
+                  "type": "string"
+                },
+                "summary": {
+                  "description": "The game's description.",
+                  "type": "string"
+                },
+                "tags": {
+                  "description": "Titles of the tags on the game, in alphabetical order.",
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                "timeToBeatComplete": {
+                  "description": "Hours to complete everything; 0 when unknown.",
+                  "type": "number"
+                },
+                "timeToBeatExtras": {
+                  "description": "Hours to finish the story and extras; 0 when unknown.",
+                  "type": "number"
+                },
+                "timeToBeatStory": {
+                  "description": "Hours to finish the main story; 0 when unknown.",
+                  "type": "number"
+                },
+                "timeToBeatType": {
+                  "description": "The time-to-beat type as stored: 0 through 2.",
+                  "type": "integer"
+                },
+                "title": {
+                  "description": "The title.",
+                  "type": "string"
+                },
+                "updatedAt": {
+                  "description": "When the game's entry last changed.",
+                  "type": "string"
+                },
+                "userRating": {
+                  "description": "The user's rating from 1 through 10; 0 when unrated.",
+                  "type": "integer"
+                },
+                "userRatingValue": {
+                  "description": "The user's rating as GameTrack exports it: the fractional rating when one is set, otherwise userRating.",
+                  "type": "number"
+                },
+                "xboxId": {
+                  "description": "ID of the linked Xbox game.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "igdbId",
+                "title",
+                "platforms",
+                "additionalPlatforms",
+                "reviewSpoilers",
+                "genres",
+                "tags",
+                "playthroughs"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "nextCursor": {
+            "description": "Cursor for the next page; omitted on the last page.",
+            "type": "string"
+          },
+          "totalCount": {
+            "description": "Number of games matching the filter.",
+            "type": "integer"
+          }
+        },
+        "required": ["items", "totalCount"],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Read one game by its GameTrack UUID or its IGDB ID, giving exactly one; returns null when absent.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "The game's UUID in GameTrack, in uppercase; it does not change over time.",
+            "type": "string"
+          },
+          "igdbId": {
+            "description": "The game's ID at IGDB, where GameTrack takes its metadata from.",
+            "type": "integer"
+          }
+        },
+        "required": [],
+        "type": "object"
+      },
+      "name": "games_get",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "game": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "addedDate": {
+                    "description": "When the game was added to GameTrack.",
+                    "type": "string"
+                  },
+                  "additionalPlatforms": {
+                    "description": "Other platforms the user also has the game on.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "additionalPlaytime": {
+                    "description": "Additional play time in hours, as stored.",
+                    "type": "number"
+                  },
+                  "bannerUrl": {
+                    "description": "URL of the banner image.",
+                    "type": "string"
+                  },
+                  "completion": {
+                    "description": "Progress through the game, as a percentage from 0 through 100.",
+                    "type": "integer"
+                  },
+                  "completionMode": {
+                    "description": "The completion mode as stored.",
+                    "type": "integer"
+                  },
+                  "completionState": {
+                    "description": "How far a completed game was taken, as stored: 0 when not completed, otherwise 1 through 3.",
+                    "type": "integer"
+                  },
+                  "criticRating": {
+                    "description": "The critics' score out of 100; 0 or -1 when there is none.",
+                    "type": "integer"
+                  },
+                  "developer": {
+                    "description": "The developer.",
+                    "type": "string"
+                  },
+                  "finishDate": {
+                    "description": "When the user finished or abandoned the game.",
+                    "type": "string"
+                  },
+                  "format": {
+                    "description": "The format owned, as stored; 0 for most games.",
+                    "type": "integer"
+                  },
+                  "gameState": {
+                    "description": "The state as stored: 1 in progress, 2 queued, 3 collection, 4 completed, 5 abandoned, 6 wanted.",
+                    "type": "integer"
+                  },
+                  "genres": {
+                    "description": "The game's genres, ordered by genre ID.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "id": {
+                          "description": "The genre's ID at IGDB.",
+                          "type": "integer"
+                        },
+                        "name": {
+                          "description": "The name, with the emoji GameTrack shows before it.",
+                          "type": "string"
+                        }
+                      },
+                      "required": ["id", "name"],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "hoursPlayed": {
+                    "description": "Hours played.",
+                    "type": "number"
+                  },
+                  "id": {
+                    "description": "The game's UUID in GameTrack, in uppercase; it does not change over time.",
+                    "type": "string"
+                  },
+                  "igdbId": {
+                    "description": "The game's ID at IGDB, where GameTrack takes its metadata from.",
+                    "type": "integer"
+                  },
+                  "notes": {
+                    "description": "The user's notes.",
+                    "type": "string"
+                  },
+                  "ownedPlatform": {
+                    "description": "The platform the user has the game on.",
+                    "type": "string"
+                  },
+                  "platforms": {
+                    "description": "Every platform the game is released on.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "playStationId": {
+                    "description": "ID of the linked PlayStation game.",
+                    "type": "string"
+                  },
+                  "playthroughs": {
+                    "description": "The game's playthroughs, oldest first.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "completionState": {
+                          "description": "How far the playthrough was taken, as a game's completionState.",
+                          "type": "integer"
+                        },
+                        "dateFinished": {
+                          "description": "When the playthrough ended.",
+                          "type": "string"
+                        },
+                        "dateStarted": {
+                          "description": "When the playthrough started.",
+                          "type": "string"
+                        },
+                        "duration": {
+                          "description": "Days from start to finish.",
+                          "type": "integer"
+                        },
+                        "gameId": {
+                          "description": "UUID of the playthrough's game.",
+                          "type": "string"
+                        },
+                        "id": {
+                          "description": "The playthrough's UUID in GameTrack.",
+                          "type": "string"
+                        },
+                        "lastPlayedAt": {
+                          "description": "When the game was last played in this playthrough.",
+                          "type": "string"
+                        },
+                        "name": {
+                          "description": "The name the user gave the playthrough.",
+                          "type": "string"
+                        },
+                        "platform": {
+                          "description": "The platform played on.",
+                          "type": "string"
+                        },
+                        "playHours": {
+                          "description": "Hours played in this playthrough.",
+                          "type": "number"
+                        },
+                        "progress": {
+                          "description": "Progress as a percentage from 0 through 100; -1 when not set.",
+                          "type": "integer"
+                        },
+                        "rating": {
+                          "description": "The user's rating of this playthrough; 0 when unrated.",
+                          "type": "number"
+                        },
+                        "state": {
+                          "description": "The playthrough's state as stored, with the meanings of a game's gameState; 0 for a game on the wishlist.",
+                          "type": "integer"
+                        },
+                        "tags": {
+                          "description": "Tags on the playthrough, as stored.",
+                          "type": "string"
+                        }
+                      },
+                      "required": ["id", "gameId"],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "posterUrl": {
+                    "description": "URL of the cover image.",
+                    "type": "string"
+                  },
+                  "priority": {
+                    "description": "The priority as stored; -1 on every game seen so far.",
+                    "type": "integer"
+                  },
+                  "publisher": {
+                    "description": "The publisher.",
+                    "type": "string"
+                  },
+                  "releaseDate": {
+                    "description": "When the game is released. 4001-01-01 means the date is to be announced, and a date at the last second of a year in Pacific time means only the year is known.",
+                    "type": "string"
+                  },
+                  "releaseYear": {
+                    "description": "The release year as stored: 0 for most games, which have only a release date, and 3000 when the date is to be announced.",
+                    "type": "integer"
+                  },
+                  "review": {
+                    "description": "The user's review.",
+                    "type": "string"
+                  },
+                  "reviewSpoilers": {
+                    "description": "Whether the review is marked as containing spoilers.",
+                    "type": "boolean"
+                  },
+                  "siteUrl": {
+                    "description": "URL of the game's web page.",
+                    "type": "string"
+                  },
+                  "startDate": {
+                    "description": "When the user started the game.",
+                    "type": "string"
+                  },
+                  "state": {
+                    "description": "Where the game stands: IN_PROGRESS, QUEUED, COLLECTION, COMPLETED, ABANDONED, or WANTED for the wishlist. Derived from gameState; absent for a value the server does not know.",
+                    "enum": [
+                      "IN_PROGRESS",
+                      "QUEUED",
+                      "COLLECTION",
+                      "COMPLETED",
+                      "ABANDONED",
+                      "WANTED"
+                    ],
+                    "type": "string"
+                  },
+                  "status": {
+                    "description": "An older status label, kept as stored; GameTrack no longer updates it and it often disagrees with state.",
+                    "type": "string"
+                  },
+                  "steamDeckStatus": {
+                    "description": "Steam Deck compatibility as stored: -1 when not checked, otherwise 0 through 3.",
+                    "type": "integer"
+                  },
+                  "steamId": {
+                    "description": "ID of the linked Steam game.",
+                    "type": "string"
+                  },
+                  "summary": {
+                    "description": "The game's description.",
+                    "type": "string"
+                  },
+                  "tags": {
+                    "description": "Titles of the tags on the game, in alphabetical order.",
+                    "items": {
+                      "type": "string"
+                    },
+                    "type": "array"
+                  },
+                  "timeToBeatComplete": {
+                    "description": "Hours to complete everything; 0 when unknown.",
+                    "type": "number"
+                  },
+                  "timeToBeatExtras": {
+                    "description": "Hours to finish the story and extras; 0 when unknown.",
+                    "type": "number"
+                  },
+                  "timeToBeatStory": {
+                    "description": "Hours to finish the main story; 0 when unknown.",
+                    "type": "number"
+                  },
+                  "timeToBeatType": {
+                    "description": "The time-to-beat type as stored: 0 through 2.",
+                    "type": "integer"
+                  },
+                  "title": {
+                    "description": "The title.",
+                    "type": "string"
+                  },
+                  "updatedAt": {
+                    "description": "When the game's entry last changed.",
+                    "type": "string"
+                  },
+                  "userRating": {
+                    "description": "The user's rating from 1 through 10; 0 when unrated.",
+                    "type": "integer"
+                  },
+                  "userRatingValue": {
+                    "description": "The user's rating as GameTrack exports it: the fractional rating when one is set, otherwise userRating.",
+                    "type": "number"
+                  },
+                  "xboxId": {
+                    "description": "ID of the linked Xbox game.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "igdbId",
+                  "title",
+                  "platforms",
+                  "additionalPlatforms",
+                  "reviewSpoilers",
+                  "genres",
+                  "tags",
+                  "playthroughs"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The game, or null when absent."
+          }
+        },
+        "required": ["game"],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Read every list, by name, with its rules. A smart list has rules and no stored games: GameTrack computes them. games_search can reproduce status, tag, and release date rules with states, tags, excludeTags, and releasedBefore.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "name": "lists_list",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "lists": {
+            "description": "Every list.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "calendar": {
+                  "description": "Whether the list is shown in the calendar.",
+                  "type": "boolean"
+                },
+                "description": {
+                  "description": "The list's description.",
+                  "type": "string"
+                },
+                "games": {
+                  "description": "The games of a manual list in position order. Omitted for a smart list: GameTrack computes those from the rules and stores none.",
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "gameId": {
+                        "description": "UUID of the game.",
+                        "type": "string"
+                      },
+                      "position": {
+                        "description": "The game's index in the list.",
+                        "type": "integer"
+                      },
+                      "section": {
+                        "description": "The section of the list the game is in.",
+                        "type": "string"
+                      }
+                    },
+                    "required": ["gameId"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "groupSortDirection": {
+                  "description": "ascending or descending.",
+                  "type": "string"
+                },
+                "groupType": {
+                  "description": "What the list groups by, as stored.",
+                  "type": "string"
+                },
+                "iconName": {
+                  "description": "Name of the list's icon.",
+                  "type": "string"
+                },
+                "id": {
+                  "description": "The list's UUID in GameTrack, in uppercase.",
+                  "type": "string"
+                },
+                "listId": {
+                  "description": "The list's numeric ID in GameTrack.",
+                  "type": "integer"
+                },
+                "name": {
+                  "description": "The list's name.",
+                  "type": "string"
+                },
+                "position": {
+                  "description": "The list's place among the lists.",
+                  "type": "integer"
+                },
+                "ranked": {
+                  "description": "Whether the list is ranked.",
+                  "type": "boolean"
+                },
+                "smart": {
+                  "description": "Whether the list is a smart list, whose games GameTrack computes from smartFilters.",
+                  "type": "boolean"
+                },
+                "smartFilterMatching": {
+                  "description": "How a smart list combines its rules, as stored.",
+                  "type": "integer"
+                },
+                "smartFilters": {
+                  "description": "The rules of a smart list; empty for a manual list.",
+                  "items": {
+                    "additionalProperties": false,
+                    "properties": {
+                      "filterOption": {
+                        "description": "How the rule applies, such as exclude or before.",
+                        "type": "string"
+                      },
+                      "selectedFromDate": {
+                        "description": "The start of the rule's date range.",
+                        "type": "string"
+                      },
+                      "selectedOptions": {
+                        "description": "The values the rule matches, such as status or tag names.",
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "selectedProgress": {
+                        "description": "The progress the rule compares with.",
+                        "type": "integer"
+                      },
+                      "selectedRating": {
+                        "description": "The rating the rule compares with.",
+                        "type": "integer"
+                      },
+                      "selectedToDate": {
+                        "description": "The end of the rule's date range.",
+                        "type": "string"
+                      },
+                      "type": {
+                        "description": "What the rule tests, such as status, tags, or releaseDate.",
+                        "type": "string"
+                      }
+                    },
+                    "required": ["selectedOptions"],
+                    "type": "object"
+                  },
+                  "type": "array"
+                },
+                "sortDirection": {
+                  "description": "ascending or descending.",
+                  "type": "string"
+                },
+                "sortType": {
+                  "description": "What the list sorts by, as stored.",
+                  "type": "string"
+                },
+                "tintColour": {
+                  "description": "The list's colour as stored: a base64 archive of a UIColor.",
+                  "type": "string"
+                },
+                "type": {
+                  "description": "The list type as stored.",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "ranked",
+                "calendar",
+                "smart",
+                "smartFilters"
+              ],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["lists"],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Read one list by its UUID; returns null when absent.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "description": "The list's UUID in GameTrack, in uppercase.",
+            "type": "string"
+          }
+        },
+        "required": ["id"],
+        "type": "object"
+      },
+      "name": "lists_get",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "list": {
+            "anyOf": [
+              {
+                "additionalProperties": false,
+                "properties": {
+                  "calendar": {
+                    "description": "Whether the list is shown in the calendar.",
+                    "type": "boolean"
+                  },
+                  "description": {
+                    "description": "The list's description.",
+                    "type": "string"
+                  },
+                  "games": {
+                    "description": "The games of a manual list in position order. Omitted for a smart list: GameTrack computes those from the rules and stores none.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "gameId": {
+                          "description": "UUID of the game.",
+                          "type": "string"
+                        },
+                        "position": {
+                          "description": "The game's index in the list.",
+                          "type": "integer"
+                        },
+                        "section": {
+                          "description": "The section of the list the game is in.",
+                          "type": "string"
+                        }
+                      },
+                      "required": ["gameId"],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "groupSortDirection": {
+                    "description": "ascending or descending.",
+                    "type": "string"
+                  },
+                  "groupType": {
+                    "description": "What the list groups by, as stored.",
+                    "type": "string"
+                  },
+                  "iconName": {
+                    "description": "Name of the list's icon.",
+                    "type": "string"
+                  },
+                  "id": {
+                    "description": "The list's UUID in GameTrack, in uppercase.",
+                    "type": "string"
+                  },
+                  "listId": {
+                    "description": "The list's numeric ID in GameTrack.",
+                    "type": "integer"
+                  },
+                  "name": {
+                    "description": "The list's name.",
+                    "type": "string"
+                  },
+                  "position": {
+                    "description": "The list's place among the lists.",
+                    "type": "integer"
+                  },
+                  "ranked": {
+                    "description": "Whether the list is ranked.",
+                    "type": "boolean"
+                  },
+                  "smart": {
+                    "description": "Whether the list is a smart list, whose games GameTrack computes from smartFilters.",
+                    "type": "boolean"
+                  },
+                  "smartFilterMatching": {
+                    "description": "How a smart list combines its rules, as stored.",
+                    "type": "integer"
+                  },
+                  "smartFilters": {
+                    "description": "The rules of a smart list; empty for a manual list.",
+                    "items": {
+                      "additionalProperties": false,
+                      "properties": {
+                        "filterOption": {
+                          "description": "How the rule applies, such as exclude or before.",
+                          "type": "string"
+                        },
+                        "selectedFromDate": {
+                          "description": "The start of the rule's date range.",
+                          "type": "string"
+                        },
+                        "selectedOptions": {
+                          "description": "The values the rule matches, such as status or tag names.",
+                          "items": {
+                            "type": "string"
+                          },
+                          "type": "array"
+                        },
+                        "selectedProgress": {
+                          "description": "The progress the rule compares with.",
+                          "type": "integer"
+                        },
+                        "selectedRating": {
+                          "description": "The rating the rule compares with.",
+                          "type": "integer"
+                        },
+                        "selectedToDate": {
+                          "description": "The end of the rule's date range.",
+                          "type": "string"
+                        },
+                        "type": {
+                          "description": "What the rule tests, such as status, tags, or releaseDate.",
+                          "type": "string"
+                        }
+                      },
+                      "required": ["selectedOptions"],
+                      "type": "object"
+                    },
+                    "type": "array"
+                  },
+                  "sortDirection": {
+                    "description": "ascending or descending.",
+                    "type": "string"
+                  },
+                  "sortType": {
+                    "description": "What the list sorts by, as stored.",
+                    "type": "string"
+                  },
+                  "tintColour": {
+                    "description": "The list's colour as stored: a base64 archive of a UIColor.",
+                    "type": "string"
+                  },
+                  "type": {
+                    "description": "The list type as stored.",
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "ranked",
+                  "calendar",
+                  "smart",
+                  "smartFilters"
+                ],
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "The list, or null when absent."
+          }
+        },
+        "required": ["list"],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Read every tag, by title, with the number of games carrying it.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "name": "tags_list",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "tags": {
+            "description": "Every tag.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "gameCount": {
+                  "description": "Number of games with this tag.",
+                  "type": "integer"
+                },
+                "id": {
+                  "description": "The tag's UUID in the database. GameTrack identifies tags by title.",
+                  "type": "string"
+                },
+                "tintColour": {
+                  "description": "The tag's colour as stored: a base64 archive of a UIColor.",
+                  "type": "string"
+                },
+                "title": {
+                  "description": "The tag's title, which identifies it.",
+                  "type": "string"
+                }
+              },
+              "required": ["title", "gameCount"],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["tags"],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Read every genre GameTrack knows, by ID, with the number of games in it.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "name": "genres_list",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "genres": {
+            "description": "Every genre.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "gameCount": {
+                  "description": "Number of games with this genre.",
+                  "type": "integer"
+                },
+                "id": {
+                  "description": "The genre's ID at IGDB.",
+                  "type": "integer"
+                },
+                "name": {
+                  "description": "The name, with the emoji GameTrack shows before it.",
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name", "gameCount"],
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": ["genres"],
+        "type": "object"
+      }
+    },
+    {
+      "annotations": {
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false,
+        "readOnlyHint": true
+      },
+      "description": "Count the games in GameTrack by state, with hours played. The library is every game not on the wishlist.",
+      "inputSchema": {
+        "additionalProperties": false,
+        "properties": {},
+        "required": [],
+        "type": "object"
+      },
+      "name": "library_summary",
+      "outputSchema": {
+        "additionalProperties": false,
+        "properties": {
+          "games": {
+            "description": "Every game in GameTrack, wishlist included.",
+            "type": "integer"
+          },
+          "genres": {
+            "description": "Number of genres.",
+            "type": "integer"
+          },
+          "hoursPlayed": {
+            "description": "Total hours played.",
+            "type": "number"
+          },
+          "libraryGames": {
+            "description": "Games that are not on the wishlist, which GameTrack shows as All Games.",
+            "type": "integer"
+          },
+          "lists": {
+            "description": "Number of lists.",
+            "type": "integer"
+          },
+          "modified": {
+            "description": "When GameTrack last wrote its database on this Mac.",
+            "type": "string"
+          },
+          "ratedGames": {
+            "description": "Games the user has rated.",
+            "type": "integer"
+          },
+          "states": {
+            "description": "Counts for each state.",
+            "items": {
+              "additionalProperties": false,
+              "properties": {
+                "games": {
+                  "description": "Games in this state.",
+                  "type": "integer"
+                },
+                "hoursPlayed": {
+                  "description": "Hours played across games in this state.",
+                  "type": "number"
+                },
+                "state": {
+                  "description": "The state.",
+                  "enum": [
+                    "IN_PROGRESS",
+                    "QUEUED",
+                    "COLLECTION",
+                    "COMPLETED",
+                    "ABANDONED",
+                    "WANTED"
+                  ],
+                  "type": "string"
+                }
+              },
+              "required": ["state", "games", "hoursPlayed"],
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "tags": {
+            "description": "Number of tags.",
+            "type": "integer"
+          },
+          "wishlistGames": {
+            "description": "Games on the wishlist.",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "games",
+          "libraryGames",
+          "wishlistGames",
+          "ratedGames",
+          "hoursPlayed",
+          "states",
+          "lists",
+          "tags",
+          "genres",
+          "modified"
+        ],
+        "type": "object"
+      }
+    }
+  ]
+}

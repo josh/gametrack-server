@@ -1,0 +1,845 @@
+type Query {
+  """
+  Games in GameTrack, wishlist included, by title unless ordered otherwise.
+  """
+  games(
+    filter: GameFilter
+    orderBy: GameOrder
+    limit: Int! = 50
+    offset: Int! = 0
+  ): GamePage!
+
+  """
+  Find a game by its UUID or by its IGDB ID, giving one; null when missing.
+  """
+  game(
+    """
+    The game's UUID in GameTrack, in uppercase; it does not change over time.
+    """
+    id: ID
+
+    """
+    The game's ID at IGDB, where GameTrack takes its metadata from.
+    """
+    igdbId: Int
+  ): Game
+
+  """
+  Every list, by name.
+  """
+  lists: [List!]!
+
+  """
+  Find a list by its UUID; null when missing.
+  """
+  list(id: ID!): List
+
+  """
+  Every tag, by title.
+  """
+  tags: [Tag!]!
+
+  """
+  Every genre GameTrack knows, by ID.
+  """
+  genres: [Genre!]!
+
+  """
+  Counts across everything in GameTrack.
+  """
+  summary: LibrarySummary!
+}
+
+input GameFilter {
+  """
+  Case-insensitive substring of the title, developer, or publisher.
+  """
+  query: String
+
+  """
+  Match any of these states; [] matches nothing.
+  """
+  states: [GameState!]
+
+  """
+  Match games owned on any of these platforms, ignoring case; [] matches nothing.
+  """
+  platforms: [String!]
+
+  """
+  Match games with any of these tag titles, ignoring case; [] matches nothing.
+  """
+  tags: [String!]
+
+  """
+  Leave out games with any of these tag titles, ignoring case; [] leaves out nothing.
+  """
+  excludeTags: [String!]
+
+  """
+  Match games with any of these genres, by name with or without its emoji, ignoring case; [] matches nothing.
+  """
+  genres: [String!]
+
+  """
+  true for games the user has rated, false for unrated ones.
+  """
+  rated: Boolean
+
+  """
+  Released at or after this RFC 3339 timestamp, or YYYY-MM-DD for that day's start in the host time zone.
+  """
+  releasedFrom: String
+
+  """
+  Released before this timestamp or day.
+  """
+  releasedBefore: String
+
+  """
+  Added to GameTrack at or after this timestamp or day.
+  """
+  addedFrom: String
+
+  """
+  Added to GameTrack before this timestamp or day.
+  """
+  addedBefore: String
+
+  """
+  Finished at or after this timestamp or day.
+  """
+  finishedFrom: String
+
+  """
+  Finished before this timestamp or day.
+  """
+  finishedBefore: String
+}
+
+enum GameState {
+  """
+  Being played.
+  """
+  IN_PROGRESS
+
+  """
+  Lined up to play.
+  """
+  QUEUED
+
+  """
+  Owned, with no plan to play yet.
+  """
+  COLLECTION
+
+  """
+  Finished.
+  """
+  COMPLETED
+
+  """
+  Dropped.
+  """
+  ABANDONED
+
+  """
+  On the wishlist; not owned.
+  """
+  WANTED
+}
+
+input GameOrder {
+  """
+  What to sort by. Games without the value sort last.
+  """
+  field: GameSortField!
+
+  """
+  ASC for smallest or earliest first, DESC for the reverse; defaults to ASC.
+  """
+  direction: SortDirection = ASC
+}
+
+enum GameSortField {
+  """
+  The title, ignoring case.
+  """
+  TITLE
+
+  """
+  The IGDB ID.
+  """
+  IGDB_ID
+
+  """
+  When the game is released.
+  """
+  RELEASE_DATE
+
+  """
+  When the game was added to GameTrack.
+  """
+  ADDED_DATE
+
+  """
+  When the user started the game.
+  """
+  START_DATE
+
+  """
+  When the user finished or abandoned the game.
+  """
+  FINISH_DATE
+
+  """
+  When the game's entry last changed.
+  """
+  UPDATED_AT
+
+  """
+  The user's rating; unrated games sort last.
+  """
+  USER_RATING
+
+  """
+  The critics' score; games without one sort last.
+  """
+  CRITIC_RATING
+
+  """
+  Hours played.
+  """
+  HOURS_PLAYED
+}
+
+enum SortDirection {
+  """
+  Smallest or earliest first.
+  """
+  ASC
+
+  """
+  Largest or latest first.
+  """
+  DESC
+}
+
+type GamePage {
+  """
+  Games in this page.
+  """
+  items: [Game!]!
+
+  """
+  Number of games matching the filter.
+  """
+  totalCount: Int!
+
+  """
+  Position and availability of neighboring pages.
+  """
+  pageInfo: PageInfo!
+}
+
+"""
+A game in GameTrack. Fields carry what GameTrack stores, under the names its own export uses.
+"""
+type Game {
+  """
+  The game's UUID in GameTrack, in uppercase; it does not change over time.
+  """
+  id: ID!
+
+  """
+  The game's ID at IGDB, where GameTrack takes its metadata from.
+  """
+  igdbId: Int!
+
+  """
+  The title.
+  """
+  title: String!
+
+  """
+  The game's description.
+  """
+  summary: String
+
+  """
+  The developer.
+  """
+  developer: String
+
+  """
+  The publisher.
+  """
+  publisher: String
+
+  """
+  URL of the cover image.
+  """
+  posterUrl: String
+
+  """
+  URL of the banner image.
+  """
+  bannerUrl: String
+
+  """
+  URL of the game's web page.
+  """
+  siteUrl: String
+
+  """
+  When the game is released. 4001-01-01 means the date is to be announced, and a date at the last second of a year in Pacific time means only the year is known.
+  """
+  releaseDate: DateTime
+
+  """
+  The release year as stored: 0 for most games, which have only a release date, and 3000 when the date is to be announced.
+  """
+  releaseYear: Int
+
+  """
+  Every platform the game is released on.
+  """
+  platforms: [String!]!
+
+  """
+  The platform the user has the game on.
+  """
+  ownedPlatform: String
+
+  """
+  Other platforms the user also has the game on.
+  """
+  additionalPlatforms: [String!]!
+
+  """
+  An older status label, kept as stored; GameTrack no longer updates it and it often disagrees with state.
+  """
+  status: String
+
+  """
+  Where the game stands: IN_PROGRESS, QUEUED, COLLECTION, COMPLETED, ABANDONED, or WANTED for the wishlist. Derived from gameState; absent for a value the server does not know.
+  """
+  state: GameState
+
+  """
+  The state as stored: 1 in progress, 2 queued, 3 collection, 4 completed, 5 abandoned, 6 wanted.
+  """
+  gameState: Int
+
+  """
+  How far a completed game was taken, as stored: 0 when not completed, otherwise 1 through 3.
+  """
+  completionState: Int
+
+  """
+  Progress through the game, as a percentage from 0 through 100.
+  """
+  completion: Int
+
+  """
+  The priority as stored; -1 on every game seen so far.
+  """
+  priority: Int
+
+  """
+  The format owned, as stored; 0 for most games.
+  """
+  format: Int
+
+  """
+  The user's rating from 1 through 10; 0 when unrated.
+  """
+  userRating: Int
+
+  """
+  The user's rating as GameTrack exports it: the fractional rating when one is set, otherwise userRating.
+  """
+  userRatingValue: Float
+
+  """
+  The critics' score out of 100; 0 or -1 when there is none.
+  """
+  criticRating: Int
+
+  """
+  Hours played.
+  """
+  hoursPlayed: Float
+
+  """
+  Additional play time in hours, as stored.
+  """
+  additionalPlaytime: Float
+
+  """
+  When the user started the game.
+  """
+  startDate: DateTime
+
+  """
+  When the user finished or abandoned the game.
+  """
+  finishDate: DateTime
+
+  """
+  When the game was added to GameTrack.
+  """
+  addedDate: DateTime
+
+  """
+  When the game's entry last changed.
+  """
+  updatedAt: DateTime
+
+  """
+  The user's notes.
+  """
+  notes: String
+
+  """
+  The user's review.
+  """
+  review: String
+
+  """
+  Whether the review is marked as containing spoilers.
+  """
+  reviewSpoilers: Boolean!
+
+  """
+  Hours to finish the main story; 0 when unknown.
+  """
+  timeToBeatStory: Float
+
+  """
+  Hours to finish the story and extras; 0 when unknown.
+  """
+  timeToBeatExtras: Float
+
+  """
+  Hours to complete everything; 0 when unknown.
+  """
+  timeToBeatComplete: Float
+
+  """
+  The time-to-beat type as stored: 0 through 2.
+  """
+  timeToBeatType: Int
+
+  """
+  Steam Deck compatibility as stored: -1 when not checked, otherwise 0 through 3.
+  """
+  steamDeckStatus: Int
+
+  """
+  The completion mode as stored.
+  """
+  completionMode: Int
+
+  """
+  ID of the linked Steam game.
+  """
+  steamId: String
+
+  """
+  ID of the linked Xbox game.
+  """
+  xboxId: String
+
+  """
+  ID of the linked PlayStation game.
+  """
+  playStationId: String
+
+  """
+  The game's genres, ordered by genre ID.
+  """
+  genres: [Genre!]!
+
+  """
+  The tags on the game, in alphabetical order.
+  """
+  tags: [Tag!]!
+
+  """
+  The game's playthroughs, oldest first.
+  """
+  playthroughs: [Playthrough!]!
+}
+
+"""
+RFC 3339 timestamp with an explicit offset, serialized in UTC.
+"""
+scalar DateTime
+
+"""
+A genre, as GameTrack takes it from IGDB.
+"""
+type Genre {
+  """
+  The genre's ID at IGDB.
+  """
+  id: Int!
+
+  """
+  The name, with the emoji GameTrack shows before it.
+  """
+  name: String!
+
+  """
+  Number of games with this genre.
+  """
+  gameCount: Int!
+}
+
+"""
+A tag the user made.
+"""
+type Tag {
+  """
+  The tag's UUID in the database. GameTrack identifies tags by title.
+  """
+  id: ID
+
+  """
+  The tag's title, which identifies it.
+  """
+  title: String!
+
+  """
+  The tag's colour as stored: a base64 archive of a UIColor.
+  """
+  tintColour: String
+
+  """
+  Number of games with this tag.
+  """
+  gameCount: Int!
+}
+
+"""
+One run through a game.
+"""
+type Playthrough {
+  """
+  The playthrough's UUID in GameTrack.
+  """
+  id: ID!
+
+  """
+  When the playthrough started.
+  """
+  dateStarted: DateTime
+
+  """
+  When the playthrough ended.
+  """
+  dateFinished: DateTime
+
+  """
+  Days from start to finish.
+  """
+  duration: Int
+
+  """
+  Progress as a percentage from 0 through 100; -1 when not set.
+  """
+  progress: Int
+
+  """
+  The playthrough's state as stored, with the meanings of a game's gameState; 0 for a game on the wishlist.
+  """
+  state: Int
+
+  """
+  How far the playthrough was taken, as a game's completionState.
+  """
+  completionState: Int
+
+  """
+  The platform played on.
+  """
+  platform: String
+
+  """
+  Hours played in this playthrough.
+  """
+  playHours: Float
+
+  """
+  When the game was last played in this playthrough.
+  """
+  lastPlayedAt: DateTime
+
+  """
+  The name the user gave the playthrough.
+  """
+  name: String
+
+  """
+  The user's rating of this playthrough; 0 when unrated.
+  """
+  rating: Float
+
+  """
+  Tags on the playthrough, as stored.
+  """
+  tags: String
+}
+
+type PageInfo {
+  """
+  Requested zero-based offset.
+  """
+  offset: Int!
+
+  """
+  Requested maximum page size.
+  """
+  limit: Int!
+
+  """
+  Whether results exist after this page.
+  """
+  hasNextPage: Boolean!
+
+  """
+  Whether matching results exist before the requested offset.
+  """
+  hasPreviousPage: Boolean!
+}
+
+"""
+A list of games, either manual or a smart list defined by rules.
+"""
+type List {
+  """
+  The list's UUID in GameTrack, in uppercase.
+  """
+  id: ID!
+
+  """
+  The list's numeric ID in GameTrack.
+  """
+  listId: Int
+
+  """
+  The list's name.
+  """
+  name: String!
+
+  """
+  The list's description.
+  """
+  description: String
+
+  """
+  The list type as stored.
+  """
+  type: String
+
+  """
+  The list's colour as stored: a base64 archive of a UIColor.
+  """
+  tintColour: String
+
+  """
+  Name of the list's icon.
+  """
+  iconName: String
+
+  """
+  Whether the list is ranked.
+  """
+  ranked: Boolean!
+
+  """
+  Whether the list is shown in the calendar.
+  """
+  calendar: Boolean!
+
+  """
+  The list's place among the lists.
+  """
+  position: Int
+
+  """
+  What the list sorts by, as stored.
+  """
+  sortType: String
+
+  """
+  ascending or descending.
+  """
+  sortDirection: String
+
+  """
+  What the list groups by, as stored.
+  """
+  groupType: String
+
+  """
+  ascending or descending.
+  """
+  groupSortDirection: String
+
+  """
+  How a smart list combines its rules, as stored.
+  """
+  smartFilterMatching: Int
+
+  """
+  Whether the list is a smart list, whose games GameTrack computes from smartFilters.
+  """
+  smart: Boolean!
+
+  """
+  The rules of a smart list; empty for a manual list.
+  """
+  smartFilters: [SmartFilter!]!
+
+  """
+  The games of a manual list in position order. Null for a smart list: GameTrack computes those from the rules and stores none.
+  """
+  games: [ListEntry!]
+}
+
+"""
+One rule of a smart list, as stored. GameTrack evaluates the rules.
+"""
+type SmartFilter {
+  """
+  What the rule tests, such as status, tags, or releaseDate.
+  """
+  type: String
+
+  """
+  The values the rule matches, such as status or tag names.
+  """
+  selectedOptions: [String!]!
+
+  """
+  The rating the rule compares with.
+  """
+  selectedRating: Int
+
+  """
+  The progress the rule compares with.
+  """
+  selectedProgress: Int
+
+  """
+  The start of the rule's date range.
+  """
+  selectedFromDate: DateTime
+
+  """
+  The end of the rule's date range.
+  """
+  selectedToDate: DateTime
+
+  """
+  How the rule applies, such as exclude or before.
+  """
+  filterOption: String
+}
+
+"""
+A game's place in a manual list.
+"""
+type ListEntry {
+  """
+  The game.
+  """
+  game: Game!
+
+  """
+  The game's index in the list.
+  """
+  position: Int
+
+  """
+  The section of the list the game is in.
+  """
+  section: String
+}
+
+"""
+Counts across everything in GameTrack.
+"""
+type LibrarySummary {
+  """
+  Every game in GameTrack, wishlist included.
+  """
+  games: Int!
+
+  """
+  Games that are not on the wishlist, which GameTrack shows as All Games.
+  """
+  libraryGames: Int!
+
+  """
+  Games on the wishlist.
+  """
+  wishlistGames: Int!
+
+  """
+  Games the user has rated.
+  """
+  ratedGames: Int!
+
+  """
+  Total hours played.
+  """
+  hoursPlayed: Float!
+
+  """
+  Counts for each state.
+  """
+  states: [StateSummary!]!
+
+  """
+  Number of lists.
+  """
+  lists: Int!
+
+  """
+  Number of tags.
+  """
+  tags: Int!
+
+  """
+  Number of genres.
+  """
+  genres: Int!
+
+  """
+  When GameTrack last wrote its database on this Mac.
+  """
+  modified: DateTime!
+}
+
+"""
+Counts for one game state.
+"""
+type StateSummary {
+  """
+  The state.
+  """
+  state: GameState!
+
+  """
+  Games in this state.
+  """
+  games: Int!
+
+  """
+  Hours played across games in this state.
+  """
+  hoursPlayed: Float!
+}
