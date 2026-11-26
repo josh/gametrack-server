@@ -5,7 +5,7 @@
 - Develop against the copy by setting `GAMETRACK_DATABASE_PATH` in a dev LaunchAgent; reading the real container needs Full Disk Access for the binary, and a rebuilt binary is ad-hoc signed and loses it.
 - Table and column names move between GameTrack versions; resolve them at runtime as `Shared/LibraryStore.swift` does, and record what a new version changes in `docs/DATABASE.md`.
 - API fields follow the columns of GameTrack's own export and carry stored values unreinterpreted. Check a change against an export taken at the same time as the snapshot.
-- `gametrack_game_count` and `gametrack_game_rating` keep the names, labels, and values of the gametrack-data exporter this server replaced.
+- `gametrack_game_count` and `gametrack_game_rating` are a contract with existing dashboards. Do not rename them or change their labels or label values.
 - Prefer existing dependencies. Do not add permanent unit/integration tests unless requested.
 
 Regenerate the GraphQL schema and MCP tool catalog after changing either:

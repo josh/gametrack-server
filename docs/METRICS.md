@@ -11,9 +11,8 @@ label, and help text; see the [format specification](https://prometheus.io/docs/
 | `gametrack_game_count`  | `year`, `platform`, `status` |
 | `gametrack_game_rating` | `year`, `rating`             |
 
-Both keep the names, labels, and values of the
-[gametrack-data](https://github.com/josh/gametrack-data) exporter this server
-replaces, so queries written against it keep working.
+Their names, labels, and label values are a contract with existing dashboards and
+do not change.
 
 `gametrack_game_count` counts every game, wishlist included; sum it without
 `status="Wanted"` for what GameTrack shows as "All Games".
@@ -26,7 +25,7 @@ replaces, so queries written against it keep working.
 
 All six statuses are emitted for each `year` and `platform` pair that has a game,
 zeros included, so a status that empties reads 0. A pair no game has is not
-emitted; the old exporter emitted every combination of year, platform, and status.
+emitted.
 
 `gametrack_game_rating` counts rated games by the user's rating, 1 through 10, for
 every year that has a game, zeros included. Unrated games are not counted.

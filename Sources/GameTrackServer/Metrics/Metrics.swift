@@ -82,8 +82,8 @@ private struct CountKey: Hashable {
   let platform: String
 }
 
-// Game gauges. gametrack_game_count and gametrack_game_rating keep the names, labels,
-// and values the gametrack-data exporter wrote, so existing dashboards read on.
+// Game gauges. The names, labels, and label values of gametrack_game_count and
+// gametrack_game_rating are a contract with existing dashboards and do not change.
 func collectMetrics() async throws -> String {
   let now = Date()
   let data = try await currentLibrary()
