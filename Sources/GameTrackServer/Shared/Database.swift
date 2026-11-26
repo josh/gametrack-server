@@ -1,5 +1,5 @@
+import CSQLite
 import Foundation
-import SQLite3
 
 // A read-only connection to GameTrack's Core Data store. The server never writes to it:
 // the store mirrors to CloudKit, and a foreign write would corrupt its change history.

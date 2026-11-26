@@ -15,9 +15,11 @@ let package = Package(
     .package(url: "https://github.com/apple/swift-log.git", exact: "1.17.2"),
   ],
   targets: [
+    .systemLibrary(name: "CSQLite"),
     .executableTarget(
       name: "GameTrackServer",
       dependencies: [
+        "CSQLite",
         .product(name: "GraphQL", package: "GraphQL"),
         .product(name: "MCP", package: "swift-sdk"),
         .product(name: "NIOCore", package: "swift-nio"),
@@ -30,6 +32,6 @@ let package = Package(
           "-Xlinker", "-sectcreate", "-Xlinker", "__TEXT", "-Xlinker", "__info_plist", "-Xlinker",
           root + "/Info.plist",
         ])
-      ])
+      ]),
   ]
 )

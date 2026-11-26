@@ -1,0 +1,7 @@
+// SQLite's C API under a module of this package's own, so the build does not depend on
+// the SDK providing a SQLite3 module: some toolchains ship it without the header.
+module CSQLite [system] {
+  header "shim.h"
+  link "sqlite3"
+  export *
+}
