@@ -505,7 +505,7 @@ private final class ToolOutcome: @unchecked Sendable {
       ProtocolVersionValidator(),
     ]))
   let server = Server(
-    name: "gametrack-server", version: "0.1.0",
+    name: "gametrack-server", version: "0.1.1",
     capabilities: .init(tools: .init(listChanged: false)))
   await server.withMethodHandler(ListTools.self) { params in
     guard params.cursor == nil else { throw MCPError.invalidParams("Tool catalog has no cursor") }
